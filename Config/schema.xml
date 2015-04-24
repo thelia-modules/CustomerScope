@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database defaultIdMethod="native" name="thelia">
+
+    <table name="scope" namespace="CustomerScope\Model">
+        <column name="scope_group_id" required="true" type="INTEGER" />
+        <column name="entity" size="255" type="VARCHAR" />
+        <column name="entity_class" size="255" type="VARCHAR" />
+        <column name="title" size="255" type="VARCHAR" />
+        <column name="description" type="CLOB" />
+        <column name="position" type="INTEGER" />
+
+        <foreign-key foreignTable="scope_group" name="fk_scope_scope_group" onUpdate="restrict" onDelete="cascade">
+            <reference foreign="id" local="scope_group_id" />
+        </foreign-key>
+
+        <behavior name="auto_add_pk" />
+        <behavior name="timestampable" />
+        <behavior name="i18n">
+            <parameter name="i18n_columns" value="title, description" />
+        </behavior>
+        <behavior name="sortable">
+            <parameter name="rank_column" value="position" />
+            <parameter name="use_scope" value="true" />
+            <parameter name="scope_column" value="scope_group_id" />
+        </behavior>
+    </table>
+
+    <table name="scope_group" namespace="CustomerScope\Model">
+        <column name="code" size="255" type="VARCHAR" />
+        <column name="title" size="255" type="VARCHAR" />
+        <column name="description" type="CLOB" />
+
+        <behavior name="auto_add_pk" />
+        <behavior name="timestampable" />
+        <behavior name="i18n">
+            <parameter name="i18n_columns" value="title, description" />
+        </behavior>
+    </table>
+
+    <table name="customer_scope" namespace="CustomerScope\Model">
+        <column name="customer_id" primaryKey="true" required="true" type="INTEGER" />
+        <column name="scope_id" primaryKey="true" required="true" type="INTEGER" />
+        <column name="entity_id" primaryKey="true" required="true" type="INTEGER" />
+        <column name="scope_entity" size="255" type="VARCHAR" />
+
+        <foreign-key foreignTable="customer" name="fk_customer_scope_customer" onUpdate="restrict" onDelete="cascade">
+            <reference foreign="id" local="customer_id" />
+        </foreign-key>
+        <foreign-key foreignTable="scope" name="fk_customer_scope_scope" onUpdate="restrict" onDelete="cascade">
+            <reference foreign="id" local="scope_id" />
+        </foreign-key>
+
+        <index name="idx_customer_scope_entity">
+            <index-column name="entity_id" />
+        </index>
+    </table>
+
+    <external-schema filename="local/config/schema.xml" referenceOnly="true" />
+</database>

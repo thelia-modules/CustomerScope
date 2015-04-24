@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<config xmlns="http://thelia.net/schema/dic/config"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
+
+    <loops>
+        <loop name="customer-scope" class="CustomerScope\Loop\CustomerScopeLoop" />
+    </loops>
+
+    <services>
+        <service id="customerscope.customerscope.handler" class="CustomerScope\Handler\CustomerScopeHandler">
+            <argument type="service" id="service_container" />
+        </service>
+        <service id="customerscope.customerscope.listener" class="CustomerScope\EventListener\CustomerScopeListener" scope="request">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="request" />
+        </service>
+    </services>
+
+</config>

@@ -1,0 +1,12 @@
+{
+    "name": "thelia/customer-scope-module",
+    "license": "LGPL-3.0+",
+    "type": "thelia-module",
+    "extra": {
+        "installer-name": "CustomerScope"
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "thelia/installer": "~1.0"
+    }
+}
