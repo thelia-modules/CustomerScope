@@ -7,11 +7,11 @@ use CustomerScope\Model\CustomerQuery;
 use CustomerScope\Model\CustomerScope;
 use CustomerScope\Model\CustomerScopeQuery;
 use CustomerScope\Model\Scope;
+use CustomerScope\Model\ScopeEntityHelper;
 use CustomerScope\Model\ScopeQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\Exception\PropelException;
-use Propel\Runtime\Map\ColumnMap;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Thelia\Core\HttpFoundation\Request;
@@ -29,11 +29,19 @@ class CustomerScopeHandler extends ContainerAware
     /** @var Translator */
     protected $translator;
 
+    /** @var  ScopeEntityHelper */
+    protected $scopeEntityHelper;
+
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
         $this->securityContext = $this->container->get('thelia.securityContext');
         $this->translator = $this->container->get('thelia.translator');
+    }
+
+    public function setScopeEntityHelper()
+    {
+        $this->scopeEntityHelper = new ScopeEntityHelper();
     }
 
     /**
@@ -46,7 +54,7 @@ class CustomerScopeHandler extends ContainerAware
      */
     public function registerCustomerScope($customerId, $entity)
     {
-        $scope = $this->getScopeByEntity($entity);
+        $scope = $this->scopeEntityHelper->getScopeByEntity($entity);
         CustomerScopeQuery::create()
             ->filterByCustomerId($customerId)
             ->filterByScope($scope)
@@ -67,8 +75,8 @@ class CustomerScopeHandler extends ContainerAware
      */
     public function getChildsOfType($parentEntity, $childType, $toArray = false)
     {
-        $parentScope = $this->getScopeByEntity($parentEntity);
-        $childScope = $this->getScopeByType($childType);
+        $parentScope = $this->scopeEntityHelper->getScopeByEntity($parentEntity);
+        $childScope = $this->scopeEntityHelper->getScopeByType($childType);
 
         if ($parentScope === null || $childScope === null) {
             return null;
@@ -139,7 +147,7 @@ class CustomerScopeHandler extends ContainerAware
             return null;
         }
 
-        return $this->getEntityByScope($customerScope->getScope(), $customerScope->getEntityId());
+        return $this->scopeEntityHelper->getEntityByScope($customerScope->getScope(), $customerScope->getEntityId());
     }
 
     /**
@@ -179,179 +187,10 @@ class CustomerScopeHandler extends ContainerAware
 
         /** @var CustomerScope $customerScope */
         foreach ($customerScopes as $customerScope) {
-            $entities[] = $this->getEntityByScope($customerScope->getScope(), $customerScope->getEntityId());
+            $entities[] = $this->scopeEntityHelper->getEntityByScope($customerScope->getScope(), $customerScope->getEntityId());
         }
 
         return $entities;
-    }
-
-    /**
-     * Return the direct parent entity of an entity
-     *
-     * @param $entity object an entity
-     * @return object parent entity
-     */
-    public function getParent($entity)
-    {
-        $scope = $this->getScopeByEntity($entity);
-
-        return $this->getParentScopeEntity($scope, $entity->getId());
-    }
-
-    /**
-     * Return all the direct childs entities (in array) of an entity
-     *
-     * @param $entity object an entity
-     * @return array an array of childs entity
-     */
-    public function getChilds($entity)
-    {
-        $scope = $this->getScopeByEntity($entity);
-
-        return $this->getChildsScopeEntities($scope, $entity->getId());
-    }
-
-
-    /**
-     * Get the direct parent entity of another entity by his Scope and id
-     *
-     * @param Scope $scope
-     * @param $entityId
-     * @return object parent entity or false if no parent found
-     */
-    public function getParentScopeEntity(Scope $scope, $entityId)
-    {
-        $parentScope = ScopeQuery::create()
-            ->filterByScopeGroupId($scope->getScopeGroupId())
-            ->filterByPosition($scope->getPosition(), Criteria::LESS_THAN)
-            ->orderByPosition(Criteria::DESC)
-            ->find()->getFirst();
-
-        $this->getEntityQueryByScope($parentScope);
-
-        $scopeEntityQuery = $this->getEntityQueryByScope($scope);
-        $scopeEntity = $this->getEntityByScope($scope, $entityId);
-
-        /** @var ColumnMap $scopeForeignKey */
-        foreach ($scopeEntityQuery->getTableMap()->getForeignKeys() as $scopeForeignKey) {
-            if ($scopeForeignKey->getRelatedTableName() === $parentScope->getEntity()) {
-                $fkValue = $scopeEntity->getByName($scopeForeignKey->getPhpName());
-                $parentEntity = $this->getEntityByScope($parentScope, $fkValue);
-            }
-        }
-
-        if (!isset($parentEntity)) {
-            return false;
-        }
-
-        return $parentEntity;
-    }
-
-    /**
-     * Get an array of all direct childs entities for another entity by his Scope and id
-     *
-     * @param Scope $scope
-     * @param $entityId
-     * @return array an array of childs entities (ex : Store)
-     */
-    public function getChildsScopeEntities(Scope $scope, $entityId)
-    {
-        $childScope = ScopeQuery::create()
-            ->filterByScopeGroupId($scope->getScopeGroupId())
-            ->filterByPosition($scope->getPosition(), Criteria::GREATER_THAN)
-            ->orderByPosition(Criteria::ASC)
-            ->find()->getFirst();
-
-        if (null === $childScope) {
-            return null;
-        }
-
-        $childScopeEntityQuery = $this->getEntityQueryByScope($childScope);
-
-        $fkName = null;
-        foreach ($childScopeEntityQuery->getTableMap()->getForeignKeys() as $childForeignKey) {
-            if ($childForeignKey->getRelatedTableName() === $scope->getEntity()) {
-                $fkName = $childForeignKey->getPhpName();
-            }
-        }
-
-        $childsEntities = $childScopeEntityQuery->findBy($fkName, $entityId);
-
-        $childsEntitiesArray = [];
-
-        foreach ($childsEntities as $childsEntity) {
-            $childsEntitiesArray[] = $childsEntity;
-        }
-
-        return $childsEntitiesArray;
-    }
-
-
-    /**
-     * Get the scope of an entity
-     *
-     * @param mixed $entity
-     * @return Scope
-     */
-    public function getScopeByEntity($entity)
-    {
-        $entityTableMap = $entity::TABLE_MAP;
-        $entityClassName = ltrim((new $entityTableMap)->getOMClass(false), '\\');
-
-        return $scope = ScopeQuery::create()->findOneByEntityClass($entityClassName);
-    }
-
-    /**
-     * Get the instance of entity for the scope and entityId given
-     *
-     * @param Scope $scope
-     * @param int $scopeEntityId
-     * @return mixed
-     */
-    public function getEntityByScope(Scope $scope, $scopeEntityId)
-    {
-        $scopeEntityQuery = $this->getEntityQueryByScope($scope);
-
-        return $scopeEntityQuery->findOneById($scopeEntityId);
-    }
-
-    /**
-     * Get the instance of entity for the type and entityId given
-     *
-     * @param string $scopeType
-     * @param $scopeEntityId
-     * @return mixed
-     */
-    public function getEntityByType($scopeType, $scopeEntityId)
-    {
-        $scope = $this->getScopeByType($scopeType);
-
-        return $this->getEntityByScope($scope, $scopeEntityId);
-    }
-
-
-    /**
-     * Get the Scope by his type
-     *
-     * @param string $scopeType The scope type (ex: store)
-     * @return Scope
-     */
-    public function getScopeByType($scopeType)
-    {
-        return ScopeQuery::create()->findOneByEntity($scopeType);
-    }
-
-    /**
-     * Get an instance of entity query for a specified scope
-     *
-     * @param Scope $scope
-     * @return ModelCriteria
-     */
-    public function getEntityQueryByScope(Scope $scope)
-    {
-        $scopeEntityQueryClass = $scope->getEntityClass() . 'Query';
-
-        return new $scopeEntityQueryClass;
     }
 
     /**
@@ -373,7 +212,6 @@ class CustomerScopeHandler extends ContainerAware
                 )
             );
         }
-
         return $customerId;
     }
 
