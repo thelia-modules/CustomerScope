@@ -13,7 +13,6 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\DependencyInjection\ContainerAware;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\Security\SecurityContext;
 use Thelia\Core\Translation\Translator;
@@ -24,6 +23,8 @@ use Thelia\Core\Translation\Translator;
 class CustomerScopeHandler extends ContainerAware
 {
     protected $sessionScope;
+
+    protected $request;
     /** @var SecurityContext */
     protected $securityContext;
     /** @var Translator */
@@ -32,17 +33,15 @@ class CustomerScopeHandler extends ContainerAware
     /** @var  ScopeEntityHelper */
     protected $scopeEntityHelper;
 
-    public function __construct(ContainerInterface $container)
+    public function __construct(Request $request, SecurityContext $securityContext, Translator $translator)
     {
-        $this->container = $container;
-        $this->securityContext = $this->container->get('thelia.securityContext');
-        $this->translator = $this->container->get('thelia.translator');
-    }
+        $this->request = $request;
+        $this->securityContext = $securityContext;
+        $this->translator = $translator;
 
-    public function setScopeEntityHelper()
-    {
         $this->scopeEntityHelper = new ScopeEntityHelper();
     }
+
 
     /**
      * Create a customer scope by associating a customer to a scope entity.
@@ -225,9 +224,7 @@ class CustomerScopeHandler extends ContainerAware
     {
         $query = new CustomerQuery();
 
-        /** @var Request $request */
-        $request = $this->container->get('request');
-        $sessionScopes = $request->getSession()->get(CustomerScopeModule::getModuleCode());
+        $sessionScopes = $this->request->getSession()->get(CustomerScopeModule::getModuleCode());
 
         if ($sessionScopes) {
             $query->filterByScopes($sessionScopes);

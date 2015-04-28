@@ -1,18 +1,14 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: vincent
- * Date: 24/04/2015
- * Time: 12:01
- */
 
 namespace CustomerScope\Model;
 
 use CustomerScope\Model\Base\Scope as BaseScope;
-use DoctrineORMModuleTest\Assets\Entity\City;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\Map\ColumnMap;
 
+/**
+ * Helper model for scopeEntity
+ */
 class ScopeEntityHelper
 {
     /**

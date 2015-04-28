@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: vincent
- * Date: 28/04/2015
- * Time: 10:29
- */
 
 namespace CustomerScope\Tests\Model;
 
@@ -14,7 +8,6 @@ use Propel\Runtime\ActiveQuery\ModelCriteria;
 
 class ScopeEntityHelperTest extends AbstractCustomerScopeTest
 {
-
     /**
      * @covers CustomerScopeHandler::getEntityQueryByScope()
      */
