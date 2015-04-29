@@ -5,6 +5,7 @@ namespace CustomerScope\Tests;
 use CustomerScope\Handler\CustomerScopeHandler;
 use CustomerScope\Model\CustomerQuery;
 use CustomerScope\Model\Scope;
+use CustomerScope\Model\ScopeEntityHelper;
 use CustomerScope\Model\ScopeGroup;
 use CustomerScope\Model\ScopeQuery;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
@@ -12,6 +13,8 @@ use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Propel;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Thelia\Core\HttpFoundation\Request;
+use Thelia\Core\Security\SecurityContext;
 use Thelia\Core\Translation\Translator;
 use Thelia\Model\CountryQuery;
 use Thelia\Model\Customer;
@@ -49,8 +52,8 @@ abstract class AbstractCustomerScopeTest extends ContainerAwareTestCase
      */
     protected static $scopeFixtures = [
         "testgroup" => [
-            "category" => "Thelia\\Model\\Category",
-            "brand" => "Thelia\\Model\\Brand",
+            "area" => ["class" => "Thelia\\Model\\Area", "position" => 1],
+            "country" => ["class" => "Thelia\\Model\\Country", "position" => 2],
         ]
     ];
 
@@ -104,8 +107,14 @@ abstract class AbstractCustomerScopeTest extends ContainerAwareTestCase
      */
     protected $handler;
 
+    /**
+     * @var ScopeEntityHelper
+     */
+    protected $helper;
+
     protected function buildContainer(ContainerBuilder $container)
     {
+
     }
 
     public static function setUpBeforeClass()
@@ -121,8 +130,16 @@ abstract class AbstractCustomerScopeTest extends ContainerAwareTestCase
     {
         parent::setUp();
 
-        // TODO: the handler should be tested before being used
-        $this->handler = new CustomerScopeHandler($this->container);
+        /** @var Request $request */
+        $request = $this->container->get("request");
+        /** @var SecurityContext $securityContext */
+        $securityContext = $this->container->get("thelia.securitycontext");
+        /** @var Translator $translator */
+        $translator = $this->container->get("thelia.translator");
+
+        // TODO: the handler and the helper should be tested before being used
+        $this->handler = new CustomerScopeHandler($request, $securityContext, $translator);
+        $this->helper = new ScopeEntityHelper();
     }
 
     public static function tearDownAfterClass()
@@ -209,18 +226,19 @@ abstract class AbstractCustomerScopeTest extends ContainerAwareTestCase
 
             self::$testScopeGroups[] = $scopeGroup;
 
-            foreach ($scopes as $scopeCode => $scopeEntityClassName) {
+            foreach ($scopes as $scopeCode => $scopeParams) {
                 // create the scope
                 $scope = (new Scope())
                     ->setScopeGroup($scopeGroup)
                     ->setEntity($scopeCode)
-                    ->setEntityClass($scopeEntityClassName);
+                    ->setEntityClass($scopeParams["class"])
+                    ->setPosition($scopeParams["position"]);
                 $scope->save();
 
                 self::$testScopes[] = $scope;
 
                 // create the scope entities
-                self::makeTestEntities($scopeEntityClassName, self::TEST_ENTITIES_COUNT);
+                self::makeTestEntities($scopeParams["class"], self::TEST_ENTITIES_COUNT);
             }
         }
     }

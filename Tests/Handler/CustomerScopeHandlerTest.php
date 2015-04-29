@@ -4,7 +4,6 @@ namespace CustomerScope\Tests\Handler;
 
 use CustomerScope\Model\Scope;
 use CustomerScope\Tests\AbstractCustomerScopeTest;
-use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Thelia\Model\Customer;
 
 /**
@@ -38,45 +37,6 @@ class CustomerScopeHandlerTest extends AbstractCustomerScopeTest
 
             $scopeEntities = $this->handler->getCustomerScopeEntities($customer->getId());
             $this->assertEmpty($scopeEntities);
-        }
-    }
-
-    /**
-     * @covers CustomerScopeHandler::getEntityQueryByScope()
-     */
-    public function testValidScopeHasEntityQuery()
-    {
-        /** @var Scope $scope */
-        foreach (self::$testScopes as $scope) {
-            $entityQuery = $this->handler->getEntityQueryByScope($scope);
-            $this->assertNotNull($entityQuery);
-            $this->assertInstanceOf(ModelCriteria::class, $entityQuery);
-        }
-    }
-
-    /**
-     * @covers CustomerScopeHandler::getScopeByEntity()
-     */
-    public function testNonAssociatedEntityHasNoScope()
-    {
-        $scope = $this->handler->getScopeByEntity(new self::$nonScopeEntityClassName());
-        $this->assertNull($scope);
-    }
-
-    /**
-     * @covers CustomerScopeHandler::getScopeByEntity()
-     */
-    public function testCanGetScopeForAssociatedEntity()
-    {
-        foreach (self::$scopeFixtures as $scopeGroupCode => $scopes) {
-            foreach ($scopes as $scopeCode => $scopeEntityClassName) {
-                foreach (self::$testEntitiesInstances[$scopeEntityClassName] as $scopeEntity) {
-                    $scope = $this->handler->getScopeByEntity($scopeEntity);
-                    $this->assertNotNull($scope);
-                    $this->assertInstanceOf(Scope::class, $scope);
-                    $this->assertEquals($scopeEntityClassName, $scope->getEntityClass());
-                }
-            }
         }
     }
 
