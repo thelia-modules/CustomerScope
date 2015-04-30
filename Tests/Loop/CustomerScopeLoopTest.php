@@ -37,10 +37,9 @@ class CustomerScopeLoopTest extends AbstractCustomerScopeTest
         $secondCustomer = self::$testCustomers[1];
         /** @var Scope $firstScope */
         $firstScope = self::$testScopes[0];
-        $firstScopeFirstEntity = self::$testEntitiesInstances[$firstScope->getEntityClass()][0];
+        $firstScopeFirstEntity = self::$testEntitiesInstances["area"]["Europe"];
         /** @var Scope $secondScope */
-        $secondScope = self::$testScopes[1];
-        $secondScopeFirstEntity = self::$testEntitiesInstances[$secondScope->getEntityClass()][0];
+        $secondScopeFirstEntity = self::$testEntitiesInstances["country"]["France"];
 
         $this->arguments["customer_id"] = $firstCustomer->getId();
         $this->arguments["scope_id"] = $firstScope->getId();

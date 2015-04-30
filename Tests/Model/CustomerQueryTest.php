@@ -93,7 +93,7 @@ class CustomerQueryTest extends AbstractCustomerScopeTest
         $firstCustomer = self::$testCustomers[0];
         /** @var Scope $firstScope */
         $firstScope = self::$testScopes[0];
-        $firstScopeFirstEntity = self::$testEntitiesInstances[$firstScope->getEntityClass()][0];
+        $firstScopeFirstEntity = self::$testEntitiesInstances["area"]["Europe"];
 
         $this->handler->registerCustomerScope($firstCustomer->getId(), $firstScopeFirstEntity);
 
@@ -115,16 +115,18 @@ class CustomerQueryTest extends AbstractCustomerScopeTest
         $firstCustomer = self::$testCustomers[0];
         /** @var Scope $firstScope */
         $firstScope = self::$testScopes[0];
-        $firstScopeFirstEntity = self::$testEntitiesInstances[$firstScope->getEntityClass()][0];
+        $firstScopeFirstEntity = self::$testEntitiesInstances["area"]["Europe"];
+        $firstScopeSecondEntity = self::$testEntitiesInstances["area"]["Océanie"];
         /** @var Scope $secondScope */
         $secondScope = self::$testScopes[1];
-        $secondScopeFirstEntity = self::$testEntitiesInstances[$secondScope->getEntityClass()][0];
+        $secondScopeFirstEntity = self::$testEntitiesInstances["country"]["France"];
 
         $this->handler->registerCustomerScope($firstCustomer->getId(), $secondScopeFirstEntity);
 
         $customers = CustomerScopeCustomerQuery::create()
             ->filterByScopes([
                 self::makeScopeArray($firstScope->getEntity(), $firstScopeFirstEntity->getId()),
+                self::makeScopeArray($firstScope->getEntity(), $firstScopeSecondEntity->getId()),
                 self::makeScopeArray($secondScope->getEntity(), $secondScopeFirstEntity->getId()),
             ])
             ->filterByFirstname(self::$testCustomersFirstNameFilter)
@@ -145,7 +147,7 @@ class CustomerQueryTest extends AbstractCustomerScopeTest
         $secondCustomer = self::$testCustomers[1];
         /** @var Scope $firstScope */
         $firstScope = self::$testScopes[0];
-        $firstScopeFirstEntity = self::$testEntitiesInstances[$firstScope->getEntityClass()][0];
+        $firstScopeFirstEntity = self::$testEntitiesInstances["area"]["Europe"];
 
         $this->handler->registerCustomerScope($secondCustomer->getId(), $firstScopeFirstEntity);
 
@@ -171,10 +173,10 @@ class CustomerQueryTest extends AbstractCustomerScopeTest
         $thirdCustomer = self::$testCustomers[2];
         /** @var Scope $firstScope */
         $firstScope = self::$testScopes[0];
-        $firstScopeFirstEntity = self::$testEntitiesInstances[$firstScope->getEntityClass()][0];
+        $firstScopeFirstEntity = self::$testEntitiesInstances["area"]["Europe"];
         /** @var Scope $secondScope */
         $secondScope = self::$testScopes[1];
-        $secondScopeFirstEntity = self::$testEntitiesInstances[$secondScope->getEntityClass()][0];
+        $secondScopeFirstEntity = self::$testEntitiesInstances["country"]["France"];
 
         $this->handler->registerCustomerScope($thirdCustomer->getId(), $secondScopeFirstEntity);
 

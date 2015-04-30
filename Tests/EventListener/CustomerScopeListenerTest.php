@@ -48,7 +48,7 @@ class CustomerScopeListenerTest extends AbstractCustomerScopeTest
     }
 
     /**
-     * @covers CustomerScope\EventListener\CustomerScope::setCustomerScopeToSession()
+     * @covers CustomerScopeListener::setCustomerScopeToSession()
      */
     public function testScopesAreAddedToSessionAtLogin()
     {

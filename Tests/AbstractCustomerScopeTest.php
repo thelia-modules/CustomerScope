@@ -16,6 +16,9 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\Security\SecurityContext;
 use Thelia\Core\Translation\Translator;
+use Thelia\Model\Area;
+use Thelia\Model\AreaQuery;
+use Thelia\Model\Country;
 use Thelia\Model\CountryQuery;
 use Thelia\Model\Customer;
 use Thelia\Model\CustomerTitleQuery;
@@ -55,6 +58,18 @@ abstract class AbstractCustomerScopeTest extends ContainerAwareTestCase
             "area" => ["class" => "Thelia\\Model\\Area", "position" => 1],
             "country" => ["class" => "Thelia\\Model\\Country", "position" => 2],
         ]
+    ];
+
+    protected static $scopeEntityFixtures = [
+        "Europe" => [
+                "France",
+                "Portugal"
+        ],
+        "Asie" => [
+                "Chine",
+                "Japon"
+        ],
+        "Océanie" => []
     ];
 
     /**
@@ -124,6 +139,7 @@ abstract class AbstractCustomerScopeTest extends ContainerAwareTestCase
         self::ensureNamesAssertions();
         self::makeTestCustomers(self::TEST_CUSTOMERS_COUNT);
         self::makeTestScopes();
+        self::makeTestEntities();
     }
 
     public function setUp()
@@ -176,8 +192,6 @@ abstract class AbstractCustomerScopeTest extends ContainerAwareTestCase
         while (CustomerQuery::create()->findOneByFirstname(self::$testCustomersFirstNameFilter) !== null) {
             self::$testCustomersFirstNameFilter .= rand(0, 9);
         }
-
-
     }
 
     /**
@@ -235,28 +249,34 @@ abstract class AbstractCustomerScopeTest extends ContainerAwareTestCase
                     ->setPosition($scopeParams["position"]);
                 $scope->save();
 
-                self::$testScopes[] = $scope;
 
-                // create the scope entities
-                self::makeTestEntities($scopeParams["class"], self::TEST_ENTITIES_COUNT);
+                self::$testScopes[] = $scope;
             }
         }
     }
 
     /**
-     * Create test scope entities of a class.
-     * @param string $className Class of the entities.
-     * @param int $count Number of entities to create.
+     * Create test scope entities
      * @throws PropelException
      */
-
-    protected static function makeTestEntities($className, $count)
+    protected static function makeTestEntities()
     {
-        for ($i = 0; $i < $count; ++$i) {
-            /** @var ActiveRecordInterface $entity */
-            $entity = new $className();
-            $entity->save();
-            self::$testEntitiesInstances[$className][$i] = $entity;
+        foreach (self::$scopeEntityFixtures as $areaName => $childs) {
+            $area = new Area();
+            $area->setName($areaName)
+                ->save();
+            self::$testEntitiesInstances["area"][$areaName] = $area;
+
+            if (is_array($childs)) {
+                foreach ($childs as $child) {
+                    $country = new Country();
+                    $country->setIsoalpha2($child)
+                        ->setAreaId($area->getId())
+                        ->save();
+
+                    self::$testEntitiesInstances["country"][$child] = $country;
+                }
+            }
         }
     }
 }
