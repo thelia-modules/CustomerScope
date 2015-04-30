@@ -110,9 +110,7 @@ class CustomerQuery extends BaseCustomerQuery
                     )
                     ->condition(
                         'condition_entity_id',
-                        CustomerScopeTableMap::ENTITY_ID . Criteria::IN . "(?)",
-                        implode(',', $scopes),
-                        \PDO::PARAM_STR
+                        CustomerScopeTableMap::ENTITY_ID . Criteria::IN . " (" . implode(',', $scopes) . ")"
                     )
                     ->combine(
                         ['condition_scope_entity', 'condition_entity_id'],
