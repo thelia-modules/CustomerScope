@@ -50,8 +50,7 @@ class CustomerScopeHandlerTest extends AbstractCustomerScopeTest
         /** @var Customer $firstCustomer */
         $firstCustomer = self::$testCustomers[0];
         /** @var Scope $firstScope */
-        $firstScope = self::$testScopes[0];
-        $firstScopeEntity = self::$testEntitiesInstances[$firstScope->getEntityClass()][0];
+        $firstScopeEntity = self::$testEntitiesInstances["area"]["Europe"];
 
         // register the customer scope
         $this->handler->registerCustomerScope($firstCustomer->getId(), $firstScopeEntity);
@@ -109,9 +108,8 @@ class CustomerScopeHandlerTest extends AbstractCustomerScopeTest
         /** @var Customer $firstCustomer */
         $firstCustomer = self::$testCustomers[0];
         /** @var Scope $firstScope */
-        $firstScope = self::$testScopes[0];
-        $firstScopeEntity = self::$testEntitiesInstances[$firstScope->getEntityClass()][0];
-        $secondScopeEntity = self::$testEntitiesInstances[$firstScope->getEntityClass()][1];
+        $firstScopeEntity = self::$testEntitiesInstances["area"]["Europe"];
+        $secondScopeEntity = self::$testEntitiesInstances["area"]["Asie"];
 
         // register the customer scope
         $this->handler->registerCustomerScope($firstCustomer->getId(), $secondScopeEntity);
@@ -140,12 +138,10 @@ class CustomerScopeHandlerTest extends AbstractCustomerScopeTest
         /** @var Customer $firstCustomer */
         $firstCustomer = self::$testCustomers[0];
         /** @var Scope $firstScope */
-        $firstScope = self::$testScopes[0];
-        $firstScopeEntity = self::$testEntitiesInstances[$firstScope->getEntityClass()][0];
-        $secondScopeEntity = self::$testEntitiesInstances[$firstScope->getEntityClass()][1];
+        $firstScopeEntity = self::$testEntitiesInstances["area"]["Europe"];
+        $secondScopeEntity = self::$testEntitiesInstances["area"]["Asie"];
         /** @var Scope $secondScope */
-        $secondScope = self::$testScopes[1];
-        $newScopeEntity = self::$testEntitiesInstances[$secondScope->getEntityClass()][0];
+        $newScopeEntity = self::$testEntitiesInstances["country"]["France"];
 
         // register the customer scope
         $this->handler->registerCustomerScope($firstCustomer->getId(), $newScopeEntity);

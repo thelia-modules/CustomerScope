@@ -72,7 +72,7 @@ class ScopeEntityHelper
      * Get the direct parent entity of an entity by his entity
      *
      * @param $scopeEntity
-     * @return object parent entity or false if no parent found
+     * @return mixed parent entity or false if no parent found
      */
     public function getParent($scopeEntity)
     {
@@ -84,10 +84,10 @@ class ScopeEntityHelper
             return false;
         }
 
-        $parentScopeEntityQuery = $this->createEntityQueryByScope($parentScope);
+        $childScopeEntityQuery = $this->createEntityQueryByScope($childScope);
 
         /** @var ColumnMap $scopeForeignKey */
-        foreach ($parentScopeEntityQuery->getTableMap()->getForeignKeys() as $scopeForeignKey) {
+        foreach ($childScopeEntityQuery->getTableMap()->getForeignKeys() as $scopeForeignKey) {
             if ($scopeForeignKey->getRelatedTableName() === $parentScope->getEntity()) {
                 $fkValue = $scopeEntity->getByName($scopeForeignKey->getPhpName());
                 $parentEntity = $this->getEntityByScope($parentScope, $fkValue);
