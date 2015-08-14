@@ -21,6 +21,7 @@ use Thelia\Model\AreaQuery;
 use Thelia\Model\Country;
 use Thelia\Model\CountryQuery;
 use Thelia\Model\Customer;
+use Thelia\Model\CustomerTitle;
 use Thelia\Model\CustomerTitleQuery;
 use Thelia\Tests\ContainerAwareTestCase;
 
@@ -201,13 +202,24 @@ abstract class AbstractCustomerScopeTest extends ContainerAwareTestCase
      */
     protected static function makeTestCustomers($count)
     {
+        // make sure we have a customer title and country available, as they are required to create a customer
+        if (null === $customerTitle = CustomerTitleQuery::create()->findOneByByDefault(true)) {
+            $customerTitle = new CustomerTitle();
+            $customerTitle->save();
+        }
+
+        if (null === $country = CountryQuery::create()->findOneByByDefault(true)) {
+            $country = new Country();
+            $country->save();
+        }
+
         // Customer::createOrUpdate() uses the Translator, make sure it has been instantiated
         new Translator(new Container());
 
         for ($i = 0; $i < $count; ++$i) {
             $customer = new Customer();
             $customer->createOrUpdate(
-                CustomerTitleQuery::create()->findOneByByDefault(true)->getId(),
+                $customerTitle->getId(),
                 self::$testCustomersFirstNameFilter,
                 "",
                 "",
@@ -217,7 +229,7 @@ abstract class AbstractCustomerScopeTest extends ContainerAwareTestCase
                 "",
                 "",
                 "",
-                CountryQuery::create()->findOneByByDefault(true)->getId(),
+                $country->getId(),
                 "foo",
                 "foo"
             );
