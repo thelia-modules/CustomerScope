@@ -45,7 +45,7 @@ class ScopeEntityHelperTest extends AbstractCustomerScopeTest
         $testScopeEntity = self::$testEntitiesInstances["country"]["France"];
         $testParent = $this->helper->getParent($testScopeEntity);
         $this->assertNotNull($testParent);
-        $this->assertInstanceOf(Area::class, $testParent);
+        $this->assertInstanceOf('Thelia\Model\Area', $testParent);
     }
 
     /**
@@ -67,7 +67,7 @@ class ScopeEntityHelperTest extends AbstractCustomerScopeTest
         foreach (self::$testScopes as $scope) {
             $entityQuery = $this->helper->createEntityQueryByScope($scope);
             $this->assertNotNull($entityQuery);
-            $this->assertInstanceOf(ModelCriteria::class, $entityQuery);
+            $this->assertInstanceOf('Propel\Runtime\ActiveQuery\ModelCriteria', $entityQuery);
         }
     }
 
@@ -90,7 +90,7 @@ class ScopeEntityHelperTest extends AbstractCustomerScopeTest
                 foreach (self::$testEntitiesInstances[$scopeCode] as $scopeEntity) {
                     $scope = $this->helper->getScopeByEntity($scopeEntity);
                     $this->assertNotNull($scope);
-                    $this->assertInstanceOf(Scope::class, $scope);
+                    $this->assertInstanceOf('CustomerScope\Model\Scope', $scope);
                     $this->assertEquals($scopeParams['class'], $scope->getEntityClass());
                 }
             }
@@ -115,7 +115,7 @@ class ScopeEntityHelperTest extends AbstractCustomerScopeTest
             foreach ($scopes as $scopeCode => $scopeParams) {
                 $scope = $this->helper->getScopeByType($scopeCode);
                 $this->assertNotNull($scope);
-                $this->assertInstanceOf(Scope::class, $scope);
+                $this->assertInstanceOf('CustomerScope\Model\Scope', $scope);
                 $this->assertEquals($scopeParams['class'], $scope->getEntityClass());
             }
         }
@@ -138,7 +138,7 @@ class ScopeEntityHelperTest extends AbstractCustomerScopeTest
         foreach (self::$testScopes as $scope) {
             $scopeEntity = $this->helper->getEntityByScope($scope, 1);
             $this->assertNotNull($scopeEntity);
-            $this->assertInstanceOf(ActiveRecordInterface::class, $scopeEntity);
+            $this->assertInstanceOf('Propel\Runtime\ActiveRecord\ActiveRecordInterface', $scopeEntity);
         }
     }
 
@@ -162,7 +162,7 @@ class ScopeEntityHelperTest extends AbstractCustomerScopeTest
             foreach ($scopes as $scopeCode => $scopeParams) {
                 $scopeEntity = $this->helper->getEntityByType($scopeCode, 1);
                 $this->assertNotNull($scopeEntity);
-                $this->assertInstanceOf(ActiveRecordInterface::class, $scopeEntity);
+                $this->assertInstanceOf('Propel\Runtime\ActiveRecord\ActiveRecordInterface', $scopeEntity);
             }
         }
     }
